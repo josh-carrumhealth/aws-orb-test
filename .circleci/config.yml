@@ -1,0 +1,23 @@
+version: '2.1'
+orbs:
+  aws-cli: circleci/aws-cli@5.1
+
+jobs:
+  execute_ecs_command:
+    executor: aws-cli/default
+    context: aws-secrets
+    steps:
+      - checkout
+      - aws-cli/setup:
+          profile_name: default
+      - aws-cli/role_arn_setup:
+          profile_name: ecs-assumed
+          role_arn: arn:aws:iam::557690624853:role/ecsFullAccessRole
+          source_profile: default
+      - run: >
+          aws ecs describe-tasks --cluster staging --task core-service-web --profile ecs-assumed
+
+workflows:
+  run_ecs_command:
+    jobs:
+      - execute_ecs_command
